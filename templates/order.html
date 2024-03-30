@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commander</title>
+</head>
+<body>
+    <h1>Donnez le numéro de votre produit et la quantité souhaitée</h1>
+
+    <form action="/order" method="post">
+        <label for="product">Numéro du produit</label>
+        <input type="text" name="product" id="product" required>
+        <label for="quantity">Quantité</label>
+        <input type="text" name="quantity" id="quantity" required>
+        <button type="submit">Commander</button>
+    </form>
+</body>
+</html>

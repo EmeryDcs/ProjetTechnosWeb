@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier</title>
+</head>
+
+<body>
+    <h1>Panier</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Quantité</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in panier %}
+            <tr>
+                <td>{{ item.nom }}</td>
+                <td>{{ item.prix }} $</td>
+                <td>{{ item.quantite }}</td>
+                <td>{{ item.prix * item.quantite }} $</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>Total : {{ total }} $</p>
+    <form action="/commande" method="post">
+        <button type="submit">Passer à la caisse</button>
+    </form>
+    <a href="/">Continuer les achats</a>
+</body>
+
+</html>
