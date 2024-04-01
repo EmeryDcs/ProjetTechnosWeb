@@ -1,5 +1,5 @@
 from flask import *
-from peewee import SqliteDatabase
+from peewee import PostgresqlDatabase
 from peewee import (
     Model,
     PrimaryKeyField,
@@ -10,7 +10,13 @@ from peewee import (
     IntegerField
 )
 
-db = SqliteDatabase('my_database.db')   
+DB_HOST = 'localhost'
+DB_USER = 'admin'
+DB_PASSWORD = 'pass'
+DB_PORT = 5432
+DB_NAME = 'db-tp-python'
+
+db = PostgresqlDatabase('my_database', user='my_user', password='my_password', host='localhost', port=5432)
 
 class Produit(Model):
     id = PrimaryKeyField()
@@ -79,26 +85,29 @@ class CommandeProduit(Model): # Table de liaison entre Commande et Produit, perm
     class Meta:
         database = db
 
-db.create_tables([Produit, Commande, CommandeProduit])
+db.connect()
 
-def init_db():
-    produits = [
-        {
-            'nom': 'Brown eggs',
-            'description': 'Raw organic brown eggs in a basket',
-            'prix': 28.1,
-            'en_stock': True,
-            'poids': 400,
-            'image': '0.jpg'
-        },
-        {
-            'nom': 'Sweet fresh stawberry',
-            'description': 'Sweet fresh stawberry on the wooden table',
-            'prix': 29.45,
-            'en_stock': True,
-            'poids': 299,
-            'image': '1.jpg'
-        }
-    ]
-    for produit in produits:
-        Produit.create(**produit)
+db.create_tables([Produit, Commande, CommandeProduit], safe=True)
+
+# Cette fonction n'est plus nécessaire
+# def init_db():
+#     produits = [
+#         {
+#             'nom': 'Brown eggs',
+#             'description': 'Raw organic brown eggs in a basket',
+#             'prix': 28.1,
+#             'en_stock': True,
+#             'poids': 400,
+#             'image': '0.jpg'
+#         },
+#         {
+#             'nom': 'Sweet fresh stawberry',
+#             'description': 'Sweet fresh stawberry on the wooden table',
+#             'prix': 29.45,
+#             'en_stock': True,
+#             'poids': 299,
+#             'image': '1.jpg'
+#         }
+#     ]
+#     for produit in produits:
+#         Produit.create(**produit)
