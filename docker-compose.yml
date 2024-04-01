@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+    web:
+        build: 
+            context: .
+            dockerfile: Dockerfile
+        command: flask run --host=0.0.0.0
+        volumes:
+            - .:/mon_app
+        ports:
+            - 5000:5000
+        environment:
+            FLASK_APP: mon_app
+            FLASK_DEBUG: true
+        depends_on:
+            - db
+            - redis
+    db:
+        image: postgres:12
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: pass
+            POSTGRES_DB: dbtp
+        ports:
+            - 5432:5432
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+    redis:
+        image: redis:5
+        ports:
+            - 6379:6379
+        volumes:
+            - redis_data:/data
+
+volumes:
+    postgres_data:
+    redis_data:

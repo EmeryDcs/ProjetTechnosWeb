@@ -3,9 +3,10 @@
 import os
 import urllib.request
 import cache_redis
+import time
 
 from flask import *
-from models import init_db, Produit, Commande, CommandeProduit
+from models import Produit, Commande, CommandeProduit
 
 app = Flask(__name__)
 
@@ -186,19 +187,20 @@ def import_api():
     for produit in data['products']:
         Produit.create(
             id=int(produit['id']),
-            type=produit['type'],
-            nom=produit['name'],
-            description=produit['description'],
-            image=produit['image'],
+            type=clean_string(produit['type']),
+            nom=clean_string(produit['name']),
+            description=clean_string(produit['description']),
+            image=clean_string(produit['image']),
             hauteur=produit['height'],
             poids=produit['weight'],
             prix=produit['price'],
             en_stock=produit['in_stock']
         )
 
-if __name__ == '__main__':
-    import_api()
-    app.run(host="0.0.0.0", debug=True)
+def clean_string(s):
+    return s.replace('\x00', '')
+
+import_api()
 
 # --------------Début d'une liaison avec des vues, ne pas prendre en compte.----------------
 #SECRET_KEY = os.urandom(24)

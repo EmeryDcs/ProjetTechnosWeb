@@ -1,32 +1,34 @@
+import time
+
 from flask import *
 from peewee import PostgresqlDatabase
 from peewee import (
     Model,
     PrimaryKeyField,
     CharField,
-    DecimalField,
+    FloatField,
     BooleanField,
     ForeignKeyField,
     IntegerField
 )
 
-DB_HOST = 'localhost'
-DB_USER = 'admin'
+DB_HOST = "db"
+DB_USER = 'user'
 DB_PASSWORD = 'pass'
 DB_PORT = 5432
-DB_NAME = 'db-tp-python'
+DB_NAME = 'dbtp'
 
-db = PostgresqlDatabase('my_database', user='my_user', password='my_password', host='localhost', port=5432)
+db = PostgresqlDatabase(DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
 
 class Produit(Model):
     id = PrimaryKeyField()
     nom = CharField()
     type = CharField()
     description = CharField()
-    prix = DecimalField()
+    prix = FloatField()
     en_stock = BooleanField()
-    hauteur = DecimalField()
-    poids = DecimalField()
+    hauteur = FloatField()
+    poids = FloatField()
     image = CharField()
 
     def to_dict(self): # Convertir un objet en dictionnaire
@@ -47,13 +49,13 @@ class Produit(Model):
 
 class Commande(Model):
     id = PrimaryKeyField()
-    prix_total = DecimalField()
+    prix_total = FloatField()
     email = CharField(null=True)
     carte_credit = CharField()
     information_livraison = CharField()
     payer = BooleanField(default = False)
     transaction = CharField(null = True)
-    prix_livraison = DecimalField(null = True)
+    prix_livraison = FloatField(null = True)
 
     class Meta:
         database = db
@@ -84,6 +86,8 @@ class CommandeProduit(Model): # Table de liaison entre Commande et Produit, perm
 
     class Meta:
         database = db
+
+time.sleep(1) # Attente de 5 secondes pour laisser le temps à la base de données de démarrer
 
 db.connect()
 
