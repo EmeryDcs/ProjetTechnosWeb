@@ -2,6 +2,7 @@
 
 import os
 import urllib.request
+import cache_redis
 
 from flask import *
 from models import init_db, Produit, Commande, CommandeProduit
