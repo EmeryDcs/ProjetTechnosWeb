@@ -83,6 +83,12 @@ class CommandeProduit(Model): # Table de liaison entre Commande et Produit, perm
                 'prix_livraison': self.commande.prix_livraison
             }
         }
+    
+    def to_dict_product(self):
+        return {
+            'id': self.produit.id,
+            'quantite': self.quantite,
+        }
 
     class Meta:
         database = db
