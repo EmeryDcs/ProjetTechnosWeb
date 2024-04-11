@@ -2,15 +2,22 @@
 
 import os
 import urllib.request
-import cache_redis
+import redis
 import time
 
 from flask import *
+from peewee import SQL
+from rq import Queue
+from rq.job import Job
 from models import Produit, Commande, CommandeProduit
 
 app = Flask(__name__)
 
+
 # --------------Partie 1 du projet----------------
+
+stockage_cache = redis.Redis(host='redis', port=6379, db=0)
+queue_redis = Queue(connection=stockage_cache)
 
 #Affichage d'un formulaire pour créer une commande OU création d'une commande via un envoi de données JSON
 @app.route('/order', methods=['POST', 'GET'])
@@ -26,7 +33,6 @@ def order():
                     if 'id' in item and 'quantity' in item :
                         if item['quantity'] >= 1:
                             produit = Produit.select().where(Produit.id == item['id']).get()
-                            print(produit)
                             if (produit.en_stock) :
                                 prix_total += produit.prix * item['quantity']
                                 poids_livraison += produit.poids * item['quantity']
@@ -76,7 +82,6 @@ def order():
                 if 'product' in data and 'id' in data['product'] and 'quantity' in data['product']:
                     if data['product']['quantity'] >= 1:
                         produit = Produit.select().where(Produit.id == data['product']['id']).get()
-                        print(produit.en_stock)
                         if (produit.en_stock) :
                             prix_total = Produit.select().where(Produit.id == data['product']['id']).get().prix * data['product']['quantity']
                             poids_livraison = Produit.select().where(Produit.id == data['product']['id']).get().poids * data['product']['quantity']
@@ -130,25 +135,36 @@ def order():
 #Affichage de la commande
 @app.route('/order/<int:commande_id>', methods=['GET'])
 def order_resume(commande_id):
-    commande_dict = {}
     try :
-        commande_nombre_lignes = CommandeProduit.select().where(CommandeProduit.commande == commande_id).count()
-        if commande_nombre_lignes > 1 :
-            commande = CommandeProduit.select().where(CommandeProduit.commande == commande_id).execute()
-            common_keys = ['id', 'prix_total', 'email', 'carte_credit',   'information_livraison', 'payer', 'prix_livraison', 'transaction']
-            produits = []
-            for commande in commande :
-                adapted_command = commande.to_dict()
-                for key in common_keys:
-                    commande_dict[key] = adapted_command['order'][key]
-                produits.append(commande.to_dict_product())
-            commande_dict['produits'] = produits
+        job = Job.fetch('my_job_id', connection=stockage_cache)
+    except :
+        job = None
+
+    if job != None :
+        return "Le paiement est en cours"
+    else :
+        if stockage_cache.exists('commande:'+str(commande_id)) :
+            return "<pre>"+json.dumps(json.loads(stockage_cache.get('commande:'+str(commande_id)).decode('utf-8')), indent=4)+"</pre>"
         else :
-            commande = CommandeProduit.select().where(CommandeProduit.commande == commande_id).get()
-            commande_dict = commande.to_dict()
-        return "<pre>"+json.dumps(commande_dict, indent=4)+"</pre>"
-    except CommandeProduit.DoesNotExist :
-        return "La commande n'existe pas", 404
+            commande_dict = {}
+            try :
+                commande_nombre_lignes = CommandeProduit.select().where(CommandeProduit.commande == commande_id).count()
+                if commande_nombre_lignes > 1 :                  
+                    commande = CommandeProduit.select().where(CommandeProduit.commande == commande_id).execute()
+                    common_keys = ['id', 'prix_total', 'email', 'carte_credit',   'information_livraison', 'payer', 'prix_livraison', 'transaction']
+                    produits = []
+                    for commande in commande :
+                        adapted_command = commande.to_dict()
+                        for key in common_keys:
+                            commande_dict[key] = adapted_command['order'][key]
+                        produits.append(commande.to_dict_product())
+                    commande_dict['produits'] = produits
+                else : #if commande_nombre_lignes > 1
+                    commande = CommandeProduit.select().where(CommandeProduit.commande == commande_id).get()
+                    commande_dict = commande.to_dict()
+                return "<pre>"+json.dumps(commande_dict, indent=4)+"</pre>"
+            except CommandeProduit.DoesNotExist :
+                return "La commande n'existe pas", 404
     
 #Ajout d'adresse ou d'une carte de crédit à la commande
 @app.route('/order/<int:commande_id>', methods=['PUT'])
@@ -158,18 +174,28 @@ def order_finalisation(commande_id):
             commande = Commande.get(Commande.id == commande_id)
             data = request.get_json()
             if 'email' in data and 'information_livraison' in data : #On vérifie que l'on a bien un email et une adresse de livraison
-                if ('country' and 'address' and 'postal_code' and 'city' and 'province') in data['information_livraison']:
-                    print(data['information_livraison'])
-                    commande.email = data['email']
-                    commande.information_livraison = data['information_livraison']
-                    commande.save()
-                    return redirect(url_for('order_resume', commande_id=commande.id), code=302)
+                if not commande.payer :
+                    if ('country' and 'address' and 'postal_code' and 'city' and 'province') in data['information_livraison']:
+                        commande.email = data['email']
+                        commande.information_livraison = data['information_livraison']
+                        commande.save()
+                        return redirect(url_for('order_resume', commande_id=commande.id), code=302)
+                    else :
+                        message_error = {
+                            "error": {
+                                'commande': {
+                                    "code": "missing-field",
+                                    "name": "La commande doit contenir une adresse de livraison valide."
+                                }
+                            }
+                        }
+                        return message_error, 422
                 else :
                     message_error = {
-                        "error": {
-                            'commande': {
-                                "code": "missing-field",
-                                "name": "La commande doit contenir une adresse de livraison valide."
+                        "errors" : {
+                            "order": {
+                                "code": "already-paid",
+                                "name": "La commande a déjà été payée."
                             }
                         }
                     }
@@ -194,30 +220,43 @@ def order_finalisation(commande_id):
                             }
                         }
                     }
-                    return "La commande a déjà été payée", 422
+                    return message_error, 422
                 else :
-                    url = 'http://dimprojetu.uqac.ca/~jgnault/shops/pay/'
-                    data['amount_charged'] = commande.prix_total + commande.prix_livraison
-                    req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), {'Content-Type': 'application/json'})
                     try :
-                        with urllib.request.urlopen(req) as response:
-                            response_pay = response.read()
-                            json_pay = json.loads(response_pay.decode('utf-8'))
-                            commande.carte_credit = json_pay['credit_card']
-                            commande.transaction = json_pay['transaction']
-                            commande.payer = True
-                            commande.save()
-                            return redirect(url_for('order_resume', commande_id=commande.id), code=302)
-                    except urllib.error.HTTPError as e: #On gère le renvoi de message d'erreur de l'API de paiement
-                        message_error = {
-                                    "error": {
-                                        'commande': {
-                                            "code": "payment-error",
-                                            "name": "La carte de crédit à été décliné."
-                                        }
-                                    }
-                                }
-                        return message_error, 422
+                        job = Job.fetch('my_job_id', connection=stockage_cache)
+                    except :
+                        job = None
+
+                    if job == None :
+                        job = queue_redis.enqueue(lancement_paiement, commande, data)
+                        return "Le paiement est en cours", 202
+                    else :
+                        return "Le paiement est déjà en cours", 409
+
+                    # -----------Ancienne méthode de paiement-----------
+                    # url = 'http://dimprojetu.uqac.ca/~jgnault/shops/pay/'
+                    # data['amount_charged'] = commande.prix_total + commande.prix_livraison
+                    # req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), {'Content-Type': 'application/json'})
+                    # try :
+                    #     with urllib.request.urlopen(req) as response:
+                    #         response_pay = response.read()
+                    #         json_pay = json.loads(response_pay.decode('utf-8'))
+                    #         commande.carte_credit = json_pay['credit_card']
+                    #         commande.transaction = json_pay['transaction']
+                    #         commande.payer = True
+                    #         commande.save()
+                    #         mise_en_cache(commande)
+                    #         return redirect(url_for('order_resume', commande_id=commande.id), code=302)
+                    # except urllib.error.HTTPError as e: #On gère le renvoi de message d'erreur de l'API de paiement
+                    #     message_error = {
+                    #                 "error": {
+                    #                     'commande': {
+                    #                         "code": "payment-error",
+                    #                         "name": "La carte de crédit à été décliné."
+                    #                     }
+                    #                 }
+                    #             }
+                    #     return message_error, 422
             else : #if 'email' in data and 'information_livraison' in data or 'credit_card' in data
                 message_error = {
                     "error": {
@@ -246,6 +285,10 @@ def import_api():
     Produit.delete().execute() #On supprime les produits déjà existants
     Commande.delete().execute() #On supprime les commandes déjà existantes
 
+    #On reset les autoincrement
+    Produit._meta.database.execute_sql("TRUNCATE TABLE produit RESTART IDENTITY CASCADE;")
+    Commande._meta.database.execute_sql("TRUNCATE TABLE commande RESTART IDENTITY CASCADE;")
+
     url = 'http://dimprojetu.uqac.ca/~jgnault/shops/products/'
 
     response = urllib.request.urlopen(url)
@@ -268,8 +311,52 @@ def import_api():
 def clean_string(s):
     return s.replace('\x00', '')
 
-import_api()
+def mise_en_cache(commande_cache):
+    commande_dict = {}
+    try :
+        commande_nombre_lignes = CommandeProduit.select().where(CommandeProduit.commande == commande_cache.id).count()
+        if commande_nombre_lignes > 1 :
+            commande = CommandeProduit.select().where(CommandeProduit.commande == commande_cache.id).execute()
+            common_keys = ['id', 'prix_total', 'email', 'carte_credit',   'information_livraison', 'payer', 'prix_livraison', 'transaction']
+            produits = []
+            for commande in commande :
+                adapted_command = commande.to_dict()
+                for key in common_keys:
+                    commande_dict[key] = adapted_command['order'][key]
+                produits.append(commande.to_dict_product())
+            commande_dict['produits'] = produits
+        else : #if commande_nombre_lignes > 1
+            commande = CommandeProduit.select().where(CommandeProduit.commande == commande_cache.id).get()
+            commande_dict = commande.to_dict()
+        stockage_cache.set('commande:'+str(commande_cache.id), json.dumps(commande_dict))
+        stockage_cache.persist('commande:'+str(commande_cache.id))
+    except CommandeProduit.DoesNotExist :
+        return "La commande n'existe pas"
 
+def lancement_paiement(commande, data):
+    url = 'http://dimprojetu.uqac.ca/~jgnault/shops/pay/'
+    data['amount_charged'] = commande.prix_total + commande.prix_livraison
+    req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), {'Content-Type': 'application/json'})
+
+    try :
+        with urllib.request.urlopen(req) as response:
+            response = response.read()
+            response = json.loads(response.decode('utf-8'))
+
+            commande.payer = response['transaction']['success']
+            commande.carte_credit = response['credit_card']
+            commande.transaction = response['transaction']
+            commande.save()
+            if response['transaction']['success'] :
+                mise_en_cache(commande)
+
+    except urllib.error.HTTPError as e: #On gère le renvoi de message d'erreur de l'API de paiement
+        return e
+
+if os.getenv('RUN_IMPORT_API') :
+    print("Import API")
+    import_api()
+    
 # --------------Début d'une liaison avec des vues, ne pas prendre en compte.----------------
 #SECRET_KEY = os.urandom(24)
 # app.secret_key = SECRET_KEY

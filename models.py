@@ -66,7 +66,6 @@ class CommandeProduit(Model): # Table de liaison entre Commande et Produit, perm
     quantite = IntegerField()
 
     def to_dict(self): # Convertir un objet en dictionnaire
-        print('carte_credit', self.commande.carte_credit),
         return {
             'order' :{
                 'id': self.commande.id,

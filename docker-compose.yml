@@ -2,7 +2,7 @@ version: '3'
 
 services:
     web:
-        build: 
+        build:
             context: .
             dockerfile: Dockerfile
         command: flask run --host=0.0.0.0
@@ -13,6 +13,7 @@ services:
         environment:
             FLASK_APP: mon_app
             FLASK_DEBUG: true
+            RUN_IMPORT_API: true
         depends_on:
             - db
             - redis
@@ -32,6 +33,11 @@ services:
             - 6379:6379
         volumes:
             - redis_data:/data
+    worker:
+        build: .
+        command: rqworker --url redis://redis:6379/0
+        depends_on:
+            - redis
 
 volumes:
     postgres_data:
