@@ -3,17 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commander</title>
+    <title>Confirmer la commande</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/script-order.js"></script>
 </head>
 <body>
-    <h1>Donnez le numéro de votre produit et la quantité souhaitée</h1>
+    <header class="header">
+        <h1 class="title title--order">Résumé de la commande</h1>
+    </header>
 
-    <form action="/order" method="post">
-        <label for="product">Numéro du produit</label>
-        <input type="text" name="product" id="product" required>
-        <label for="quantity">Quantité</label>
-        <input type="text" name="quantity" id="quantity" required>
-        <button type="submit">Commander</button>
-    </form>
+    <main>
+        <form action="/order" method="post" class="order__resume">
+
+            <table class="order__list" id="orderList">
+                <tr class="order__cat">
+                    <th>
+                        <label for="id[]">Identifiant produit</label>
+                    </th>
+                    <th>
+                        <p>Produit</p>
+                    </th>
+                    <th>
+                        <label for="quantity[]">Quantité</label>
+                    </th>
+                </tr>
+            </table>
+            <button type="submit" class="btn">Valider la commande</button>
+        </form>
+    </main>
+    <template id="order-template">
+        <tr class="order__item">
+            <td>
+                <input type="number" name="id[]" value="~~id~~" required readonly>
+            </td>
+            <td>
+                <p>~~nom~~</p>
+            </td>
+            <td>
+                <input type="number" id="orderItemQuantity" name="quantity[]" min="0" value="~~quantity~~" required>
+            </td>
+        </tr>
+    </template>
 </body>
 </html>

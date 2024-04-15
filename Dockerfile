@@ -12,4 +12,9 @@ EXPOSE 5000
 
 COPY * .
 
+COPY templates/ ./templates/
+
+COPY static/ ./static/
+
+
 CMD python /mon_app.py
