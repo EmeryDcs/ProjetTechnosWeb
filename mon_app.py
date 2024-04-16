@@ -163,9 +163,10 @@ def order_resume(commande_id):
                 else : #if commande_nombre_lignes > 1
                     commande = CommandeProduit.select().where(CommandeProduit.commande == commande_id).get()
                     commande_dict = commande.to_dict()
-                return "<pre>"+json.dumps(commande_dict, indent=4)+"</pre>"
+                # return "<pre>"+json.dumps(commande_dict, indent=4)+"</pre>"
                 # UPD CSS : return render_template('order_resume.html', commande=commande_dict)
-            except CommandeProduit.DoesNotExist :
+                return render_template('order_resume.html', order = commande)
+    except CommandeProduit.DoesNotExist :
                 return "La commande n'existe pas", 404
     
 #Ajout d'adresse ou d'une carte de crédit à la commande
@@ -279,8 +280,9 @@ def json_produits():
     produits_dict = []
     for produit in produits :
         produits_dict.append(produit.to_dict())
-    return "<pre>"+json.dumps(produits_dict, indent=4)+"</pre>"
-    # UPD CSS : return render_template('json.html', produits=produits_dict)
+    # return "<pre>"+json.dumps(produits_dict, indent=4)+"</pre>"
+    return render_template('index.html', produits = produits_dict)
+
 
 def import_api():
     #Pour simplifier les appels d'API, nous avons décidé de supprimer les commandes et les produits déjà existants

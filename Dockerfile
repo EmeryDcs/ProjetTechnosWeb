@@ -22,5 +22,10 @@ ENV FLASK_DEBUG=True \
     DB_PASSWORD=pass \
     DB_PORT=5432 \
     DB_NAME=api8inf349
+    
+COPY templates/ ./templates/
+
+COPY static/ ./static/
+
 
 CMD python /mon_app.py
