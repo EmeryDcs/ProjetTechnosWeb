@@ -8,14 +8,14 @@
 </head>
 <body id="body">
     <header class="header">
-        <h1 class="title title--order">Commande n°{{order.id}}</h1>
+        <h1 class="title title--order">Commande n°{{commande.id}}</h1>
     </header>
     <main class="order__list">
-        <p>Email : {{order.email}}</p>
-        <!-- <p>Information de livraison : {{order.information_livraison}}</p> -->
-        <p>Payer : {{order.payer}}</p>
-        <p>Prix_livraison : {{order.prix_livraison}}</p>
-        <p>Prix_total : {{order.prix_total}}</p>
+        <p>Email : {{commande.email}}</p>
+        <!-- <p>Information de livraison : {{commande.information_livraison}}</p> -->
+        <p>Payer : {{commande.payer}}</p>
+        <p>Prix_livraison : {{commande.prix_livraison}}</p>
+        <p>Prix_total : {{commande.prix_total}}</p>
         <table class="order__list" id="orderList">
             <tr class="order__cat">
                 <th>
@@ -29,7 +29,7 @@
                 </th>
             </tr>
 
-            {% for item in order.produits %}
+            {% for item in commande.produits %}
             <tr class="order__item">
                 <td>
                     <p>{{item.id}}</p>
@@ -38,7 +38,7 @@
                     <p>{{item.nom}}</p>
                 </td>
                 <td>
-                    <p>{{item.quantity}}</p>
+                    <p>{{item.quantite}}</p>
                 </td>
             </tr>
             {% endfor %}

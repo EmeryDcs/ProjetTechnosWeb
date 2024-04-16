@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,14 @@
     <link rel="stylesheet" href="./static/css/style.css">
     <script src="./static/js/script-order.js"></script>
 </head>
+
 <body>
     <header class="header">
         <h1 class="title title--order">Résumé de la commande</h1>
     </header>
 
     <main>
-        <form action="/order" method="post" class="order__resume">
+        <form action="/order" method="post" class="order__resume" id="myForm">
 
             <table class="order__list" id="orderList">
                 <tr class="order__cat">
@@ -44,5 +46,7 @@
             </td>
         </tr>
     </template>
+
 </body>
+
 </html>
