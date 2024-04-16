@@ -3,50 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Résumé de Commande</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script-order-resume.js"></script>
+    <title>Commande</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body id="body">
-    <template id="resume-template">
-        <header class="header">
-            <h1 class="title title--order">Commande n°{{order.id}}</h1>
-        </header>
-        <main class="order__list">
-            <p>Email : {{order.email}}</p>
-            <p>Information de livraison : {{order.information_livraison}}</p>
-            <p>Payer : {{order.payer}}</p>
-            <p>Prix_livraison : {{order.prix_livraison}}</p>
-            <p>Prix_total : {{order.prix_total}}</p>
-            <table class="order__list" id="orderList">
-                <tr class="order__cat">
-                    <th>
-                        <label for="product">Identifiant produit</label>
-                    </th>
-                    <th>
-                        <p>Produit</p>
-                    </th>
-                    <th>
-                        <label for="quantity">Quantité</label>
-                    </th>
-                </tr>
+    <header class="header">
+        <h1 class="title title--order">Commande n°{{order.id}}</h1>
+    </header>
+    <main class="order__list">
+        <p>Email : {{order.email}}</p>
+        <!-- <p>Information de livraison : {{order.information_livraison}}</p> -->
+        <p>Payer : {{order.payer}}</p>
+        <p>Prix_livraison : {{order.prix_livraison}}</p>
+        <p>Prix_total : {{order.prix_total}}</p>
+        <table class="order__list" id="orderList">
+            <tr class="order__cat">
+                <th>
+                    <p>Identifiant produit</p>
+                </th>
+                <th>
+                    <p>Produit</p>
+                </th>
+                <th>
+                    <p>Quantité</p>
+                </th>
+            </tr>
 
-                {% for produit in oder.produits %}
-                <tr class="order__item">
-                    <td>
-                        <p>{{produit.id}}</p>
-                    </td>
-                    <td>
-                        <p>{{produit.nom}}</p>
-                    </td>
-                    <td>
-                        <p>{{produit.quantity}}</p>
-                    </td>
-                </tr>
-                {% endfor %}
+            {% for item in order.produits %}
+            <tr class="order__item">
+                <td>
+                    <p>{{item.id}}</p>
+                </td>
+                <td>
+                    <p>{{item.nom}}</p>
+                </td>
+                <td>
+                    <p>{{item.quantity}}</p>
+                </td>
+            </tr>
+            {% endfor %}
 
-            </table>
-        </main>
-    </template>    
+        </table>
+    </main> 
 </body>
 </html>

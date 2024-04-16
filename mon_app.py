@@ -147,7 +147,7 @@ def order_resume(commande_id):
             commande = CommandeProduit.select().where(CommandeProduit.commande == commande_id).get()
             commande_dict = commande.to_dict()
         # return "<pre>"+json.dumps(commande_dict, indent=4)+"</pre>"
-        return render_template('order-resume.html', order = commande_dict)
+        return render_template('order_resume.html', order = commande)
     except CommandeProduit.DoesNotExist :
         return "La commande n'existe pas", 404
     
