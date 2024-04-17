@@ -30,6 +30,7 @@ let togglePanier = function () {
     panier.classList.toggle("hidden");
     let body = document.querySelector("body")
     body.classList.toggle("no-scroll")
+    document.documentElement.scrollTop = 0;
 }
 
 window.addEventListener("load", (event) => {
@@ -47,6 +48,9 @@ window.addEventListener("load", (event) => {
                     }
                 }
             }
+        }
+        if (item.classList.contains("produit__item--disabled")) {
+            return
         }
 
         let article = {};
@@ -75,6 +79,7 @@ window.addEventListener("load", (event) => {
             articleQuantity.innerHTML = quantity
         }
         panierInit(article, quantity)
+        togglePanier()
 
     })
 

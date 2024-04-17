@@ -1,9 +1,9 @@
-/* Reset               */
+/* Reset    */
 /* ------------------- */
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 /* Reset margins */
@@ -16,7 +16,7 @@ h5,
 p,
 figure,
 picture {
-  margin: 0;
+    margin: 0;
 }
 
 h1,
@@ -26,51 +26,50 @@ h4,
 h5,
 h6,
 p {
-  font-weight: 400;
+    font-weight: 400;
 }
 
 /* make images easier to work with */
 img,
 picture {
-  max-width: 100%;
-  display: block;
+    max-width: 100%;
+    display: block;
 }
 
 ul {
-  padding: 0;
-  margin: 0;
-  list-style: none;
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 html,
 body {
-  height: 100%;
-  scroll-behavior: smooth;
+    height: 100%;
+    scroll-behavior: smooth;
 }
 
 a {
-  text-decoration: none;
+    text-decoration: none;
 }
 body{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     background: linear-gradient(-45deg, #eaa6c0, #23a6d5, #23d5ab, #23a6d5, #eaa6c0);
     background-size: 1500% 1500%;
     animation: gradient 15s ease infinite;
-	height: 100vh;
+    height: 100vh;
     margin: 0;
 }
 
-
 @keyframes gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
+    0% {
+    background-position: 0% 50%;
+    }
+    50% {
+    background-position: 100% 50%;
+    }
+    100% {
+    background-position: 0% 50%;
+    }
 }
 
 .hidden{
@@ -100,7 +99,7 @@ body{
     justify-content: space-between;
 }
 
-.title{ 
+.title{
     text-transform: uppercase;
     color: black;
     letter-spacing: .25ch;
@@ -183,7 +182,7 @@ body{
     justify-content: space-between;
     align-items: start;
     width: 100%;
-    
+
 }
 
 .article__price{
@@ -223,6 +222,34 @@ body{
     transform: scale(1.1);
 }
 
+.produit__item--disabled {
+    cursor: not-allowed;
+    position: relative;
+    opacity: .75;
+}
+
+.produit__item--disabled::after {
+    content: "Hors stock";
+    position: absolute;
+    top: 45%;
+    left: 30%;
+    background-color: gainsboro;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.produit__item--disabled:hover{
+    transform: none;
+}
+
+.produit__item--disabled .produit__add{
+    display: flex;
+    transform: scale(3) rotate(45deg);
+    cursor: not-allowed;
+}
+
 .produit__add{
     display: none;
     position: absolute;
@@ -246,7 +273,9 @@ body{
 
 .produit__img{
     background-color: gainsboro;
-    width: 95%;
+    min-width: 95%;
+    max-width: 95%;
+    overflow: scroll;
     margin: auto;
     aspect-ratio: 1/1;
 }
@@ -254,7 +283,6 @@ body{
 .produit__text{
     text-transform: capitalize;
 }
-
 
 /* ------------ */
 /* Order Resume */
@@ -265,7 +293,7 @@ body{
     width: 100%;
 }
 
-.order__resume{
+.order__valid{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -302,4 +330,29 @@ body{
     text-align: center;
     cursor: default;
     color: black;
+}
+
+.order__resume{
+    text-align: left;
+    background: rgba(220, 220, 220, 0.5);
+    margin-top: 2rem ;
+    margin: auto;
+    width: 75%;
+    padding: 2rem 5rem;
+    backdrop-filter: blur(2px);
+    border-radius: 5px;
+}
+
+.order__resume > * {
+    width: 100%;
+}
+
+.info__livraison{
+    display: flex;
+    flex-direction: column;
+}
+
+.info__livraison--item{
+    padding-left: 1rem;
+    text-align:center;
 }

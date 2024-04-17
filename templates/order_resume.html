@@ -10,19 +10,27 @@
     <header class="header">
         <h1 class="title title--order">Commande n°{{commande.id}}</h1>
     </header>
-    <main class="order__list">
+    <main class="order__resume">
         <p>Email : {{commande.email}}</p>
-        <!-- <p>Information de livraison : {{commande.information_livraison}}</p> -->
-        <p>Payer : {{commande.payer}}</p>
-        <p>Prix_livraison : {{commande.prix_livraison}}</p>
-        <p>Prix_total : {{commande.prix_total}}</p>
+        <div class="info__livraison">
+            <p>Information de livraison : </p>
+            <p class="info__livraison--item">{{commande.information_livraison.address}},</p>
+            <p class="info__livraison--item">{{commande.information_livraison.city}}, {{commande.information_livraison.province}} {{commande.information_livraison.postal_code}},</p>
+            <p class="info__livraison--item">{{commande.information_livraison.country}}</p>
+        </div>
+        
+
+        {% if commande.payer %}
+        <p>La commande a été réglé.</p>
+        {% else %}
+        <p> La commande n'a pas encore été réglé.</p>
+        {% endif %}
+        <p>Prix_livraison : {{commande.prix_livraison}} $</p>
+        <p>Prix_total : {{commande.prix_total}} $</p>
         <table class="order__list" id="orderList">
             <tr class="order__cat">
                 <th>
                     <p>Identifiant produit</p>
-                </th>
-                <th>
-                    <p>Produit</p>
                 </th>
                 <th>
                     <p>Quantité</p>
@@ -33,9 +41,6 @@
             <tr class="order__item">
                 <td>
                     <p>{{item.id}}</p>
-                </td>
-                <td>
-                    <p>{{item.nom}}</p>
                 </td>
                 <td>
                     <p>{{item.quantite}}</p>
