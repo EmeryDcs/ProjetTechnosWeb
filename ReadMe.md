@@ -1,6 +1,6 @@
 # Projet Technos Web
 
-Ce projet vise à développer une API web grâce à Flask et Peewee.
+Ce projet vise à développer une API web grâce à Flask, Peewee, Redis et RedisQueue.
 
 # Réalisé par :
 
@@ -15,6 +15,11 @@ POML14570300
 - Fonctionnalité 2 : Création d'une commande via un POST sur /order
 - Fonctionnalité 3 : Mise à jour de la commande via un PUT sur /order/{id}
 
+## Lancement de l'appli
+
+L'application se lance grâce à la simple commande suivante : docker-compose run --build
+L'option de build n'est pas obligatoire à la commande si vous avez déjà executé la commande auparavant et que vous n'avez pas changé le code.
+
 ## Exemples via Postman fonctionnels :
 
 POST http://127.0.0.1:5000/order envoi du JSON suivant : 
@@ -22,6 +27,14 @@ POST http://127.0.0.1:5000/order envoi du JSON suivant :
     "product": {
         "id": 3, "quantity": 3
     }
+}
+OU
+POST http://127.0.0.1:5000/order envoi du JSON suivant : 
+{
+    "products": [
+        {"id": 3, "quantity": 3},
+        {"id": 5, "quantity": 2}
+    ]
 }
 
 PUT http://127.0.0.1:5000/order/1 envoi du JSON suivant : 
@@ -54,3 +67,5 @@ PUT http://127.0.0.1:5000/order/1 envoi du JSON suivant :
 - Python
 - Flask
 - Peewee
+- Redis
+- RedisQueue
