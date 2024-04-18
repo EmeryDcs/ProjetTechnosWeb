@@ -5,6 +5,9 @@ Ce projet vise à développer une API web grâce à Flask et Peewee.
 # Réalisé par :
 
 Ce projet a été réalisé par Emery Descours et Loïne Pommier
+Codes permanents : 
+DESE11119900
+POML14570300
 
 ## Fonctionnalités
 

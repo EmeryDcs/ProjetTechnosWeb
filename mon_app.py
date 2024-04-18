@@ -45,7 +45,8 @@ def order():
 @app.route('/order/<int:commande_id>', methods=['GET'])
 def order_resume(commande_id):
     try :
-        job = Job.fetch('my_job_id', connection=stockage_cache)
+        job_id = stockage_cache.get('job_commande:'+str(commande.id)).decode('utf-8')
+        job = Job.fetch(job_id, connection=stockage_cache)
     except :
         job = None
 
@@ -55,7 +56,6 @@ def order_resume(commande_id):
         if stockage_cache.exists('commande:'+str(commande_id)) :
             #return "<pre>"+json.dumps(json.loads(stockage_cache.get('commande:'+str(commande_id)).decode('utf-8')), indent=4)+"</pre>"
             commande_dict = json.loads(stockage_cache.get('commande:'+str(commande_id)).decode('utf-8'))
-            print(commande_dict)
             return render_template('order_resume.html', commande=commande_dict)
         else :
             commande_dict = {}
@@ -76,7 +76,6 @@ def order_resume(commande_id):
                     commande_dict = commande.to_dict()
                 # return "<pre>"+json.dumps(commande_dict, indent=4)+"</pre>"
                 # UPD CSS : return render_template('order_resume.html', commande=commande_dict)
-                print(commande_dict)
                 return render_template('order_resume.html', commande = commande_dict)
             except CommandeProduit.DoesNotExist :
                         return "La commande n'existe pas", 404
@@ -84,7 +83,6 @@ def order_resume(commande_id):
 #Ajout d'adresse ou d'une carte de crédit à la commande
 @app.route('/order/<int:commande_id>', methods=['PUT'])
 def order_finalisation(commande_id):
-    print('ici')
     if request.is_json:
         if Commande.select().where(Commande.id == commande_id).exists() : #On vérifie que la commande existe
             commande = Commande.get(Commande.id == commande_id)
@@ -139,12 +137,16 @@ def order_finalisation(commande_id):
                     return message_error, 422
                 else :
                     try :
-                        job = Job.fetch('my_job_id', connection=stockage_cache)
+                        job_id = stockage_cache.get('job_commande:'+str(commande.id)).decode('utf-8')
+                        job = Job.fetch(job_id, connection=stockage_cache)
                     except :
                         job = None
 
                     if job == None :
                         job = queue_redis.enqueue(lancement_paiement, commande, data)
+                        job_id = job.get_id()
+                        stockage_cache.set('job_commande:'+str(commande.id), job_id)
+                        stockage_cache.persist('job_commande:'+str(commande.id))
                         return "Le paiement est en cours", 202
                     else :
                         return "Le paiement est déjà en cours", 409
@@ -255,6 +257,7 @@ def mise_en_cache(commande_cache):
         return "La commande n'existe pas"
 
 def lancement_paiement(commande, data):
+    time.sleep(5)
     url = 'http://dimprojetu.uqac.ca/~jgnault/shops/pay/'
     data['amount_charged'] = commande.prix_total + commande.prix_livraison
     req = urllib.request.Request(url, json.dumps(data).encode('utf-8'), {'Content-Type': 'application/json'})
@@ -379,7 +382,6 @@ def creer_commande(data):
             return message_error, 422
 
 if os.getenv('RUN_IMPORT_API') :
-    print("Import API")
     import_api()
     
 # --------------Début d'une liaison avec des vues, ne pas prendre en compte.----------------
